@@ -37,10 +37,10 @@ function App(props) {
   const copyEnabled = hasCopyPermission;
 
   return html`
-    <div tw="font-thin bg-gray-700 min-h-screen text-white py-4">
-      <h1 tw="text-3xl text-center mb-4">Firmas de email</h1>
+    <div tw="bg-gray-700 min-h-screen text-white py-4">
+      <h1 tw="text-3xl text-center mb-4 font-thin ">Firmas de email</h1>
       <div tw="lg:flex lg:space-x-4 px-4 max-w-screen-lg mx-auto shadow-md">
-        <div tw="flex-shrink-0 p-4 bg-gray-100 rounded-md max-w-[550px]">
+        <div tw="flex-shrink-0 p-4 bg-gray-100 rounded-md max-w-[550px] mx-auto">
           <div tw="mb-4 text-center">${MobileSwitchButton(smallView, setSmallView)}</div>
           <div
             ref=${signatureElement}
@@ -61,14 +61,25 @@ function App(props) {
             selectAndCopy(codeElement.current, copyEnabled)
           )}
         </div>
-        <div
-          tw="bg-gray-100 font-normal flex-grow mt-4 lg:mt-0 py-4 space-y-4 rounded-md shadow-md"
-        >
+        <div tw="bg-gray-100 flex-grow mt-4 lg:mt-0 py-4 space-y-4 rounded-md shadow-md">
           ${Object.entries(obralindaSchema).map(([key, { name, type }]) => {
             if (type === "text") return TextInput(name, config[key], handleConfigInput(key));
             else if (type === "color") return ColorInput(name, config[key], handleConfigInput(key));
           })}
         </div>
+      </div>
+      <div tw="text-center mt-8">
+        <a tw="opacity-80 cursor-pointer">
+          ${"Hecho con ❤️ por "}
+          <a tw="text-blue-300 underline hover:text-blue-500" href="https://ezequielschwartzman.org"
+            >Ezequiel</a
+          >${" encuentra el "}
+          <a
+            tw="text-blue-300 underline hover:text-blue-500"
+            href="https://github.com/Zequez/email-signature-builder"
+            >código fuente en Github</a
+          >
+        </a>
       </div>
     </div>
   `;
