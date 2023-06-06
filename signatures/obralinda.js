@@ -1,5 +1,9 @@
 import { html } from "../external.js";
 
+export const meta = {
+  title: "Obralinda",
+};
+
 export const defaultConfig = {
   name: "Cecilia Pallín",
   phone: "+54 9 223 4476972",
@@ -20,7 +24,7 @@ export const schema = {
   color: { name: "Color", type: "color" },
 };
 
-export default ({ image, name, phone, website, instagram, color, imageAlt }) => {
+export const template = ({ image, name, phone, website, instagram, color, imageAlt }) => {
   const plainWebsite = website.replace(/https?:\/\//, "");
   const phoneNumbersOnly = phone.replace(/\D/g, "");
 

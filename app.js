@@ -1,14 +1,21 @@
 import { html, tw, render, useState, useEffect, useRef } from "./external.js";
 import { usePersistentState } from "./hooks.js";
-import obralinda, { schema as obralindaSchema, defaultConfig } from "./signatures/obralinda.js";
+import * as obralinda from "./signatures/obralinda.js";
+import signatures from "./signatures/index.js";
 
 function App(props) {
   const signatureElement = useRef();
   const codeElement = useRef();
+  const [signatureBase, setSignatureBase] = useState("obralinda");
   const [hasCopyPermission, setHasCopyPermission] = useState(true);
-  const [config, setConfig] = usePersistentState("obralindaConfig", defaultConfig);
+  const [config2, setConfig2] = usePersistentState("config", () => ({
+    [signatureBase]: signatures[signatureBase].defaultConfig,
+  }));
   const [smallView, setSmallView] = useState(false);
   const [rawHtml, setRawHtml] = useState("");
+
+  const signature = signatures[signatureBase];
+  const signatureConfig = config2[signatureBase] || signature.defaultConfig;
 
   useEffect(() => {
     promptCopyPermission();
@@ -24,21 +31,35 @@ function App(props) {
     });
   }
 
-  const handleConfigInput = (key) => (value) => {
-    setConfig((oldConfig) => {
-      return { ...oldConfig, [key]: value };
+  const handleConfig2Input = (key) => (value) => {
+    setConfig2((oldConfig) => {
+      return { ...oldConfig, [signatureBase]: { ...signatureConfig, [key]: value } };
     });
   };
 
   useEffect(() => {
     setRawHtml(signatureElement.current.innerHTML);
-  }, [config]);
+  }, [signatureBase, config2]);
 
   const copyEnabled = hasCopyPermission;
 
   return html`
     <div tw="bg-gray-700 min-h-screen text-white py-4">
       <h1 tw="text-3xl text-center mb-4 font-thin ">Firmas de email</h1>
+      <div tw="flex justify-center mb-4">
+        ${Object.entries(signatures).map(
+          ([key, { meta }]) =>
+            html`<button
+              tw=${[
+                "px-4 py-2 focus:outline-none uppercase bg-gradient-to-b from-gray-100 to-gray-200 text-gray-500 last:rounded-r-md first:rounded-l-md border-r border-gray-300 last:border-0",
+                { " from-gray-300 to-gray-200 pt-2.5 text-gray-600": key === signatureBase },
+              ]}
+              onClick=${() => setSignatureBase(key)}
+            >
+              ${meta.title}
+            </button>`
+        )}
+      </div>
       <div tw="lg:flex lg:space-x-4 px-4 max-w-screen-lg mx-auto shadow-md">
         <div tw="flex-shrink-0 p-4 bg-gray-100 rounded-md max-w-[550px] mx-auto">
           <div tw="mb-4 text-center">${MobileSwitchButton(smallView, setSmallView)}</div>
@@ -47,7 +68,7 @@ function App(props) {
             tw="border border-gray-300 mx-auto mb-4 bg-white"
             style=${smallView ? "width: 320px" : "width: 100%"}
           >
-            ${obralinda(config)}
+            ${signature.template(signatureConfig)}
           </div>
           ${CopyOrSelectButton("HTML", copyEnabled, () =>
             selectAndCopy(signatureElement.current, copyEnabled)
@@ -62,9 +83,12 @@ function App(props) {
           )}
         </div>
         <div tw="bg-gray-100 flex-grow mt-4 lg:mt-0 py-4 space-y-4 rounded-md shadow-md">
-          ${Object.entries(obralindaSchema).map(([key, { name, type }]) => {
-            if (type === "text") return TextInput(name, config[key], handleConfigInput(key));
-            else if (type === "color") return ColorInput(name, config[key], handleConfigInput(key));
+          ${Object.entries(signature.schema).map(([key, { name, type }]) => {
+            if (type === "text")
+              return TextInput(name, signatureConfig[key], handleConfig2Input(key));
+            else if (type === "color")
+              return ColorInput(name, signatureConfig[key], handleConfig2Input(key));
+            else if (type === "image") return "Image";
           })}
         </div>
       </div>

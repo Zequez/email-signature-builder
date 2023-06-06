@@ -5,7 +5,6 @@ const localStoragePrefix = "email_signature_builder_";
 export function usePersistentState(key, initialValue, encoder = (v) => v, decoder = (v) => v) {
   const [storedValue, setStoredValue] = useState(() => {
     const item = localStorage.getItem(`${localStoragePrefix}${key}`);
-    console.log(`${localStoragePrefix}${key}`);
 
     function tryParse() {
       try {
